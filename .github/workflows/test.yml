@@ -1,0 +1,35 @@
+name: K6 load test
+
+on:
+    push:
+      branches: [ main ]
+    pull_request:
+      branches: [ main ]
+
+jobs:
+  protocol:
+    runs-on: ubuntu-latest
+    steps:
+      - name: step 1 - checkout
+        uses: actions/checkout@v4
+
+      - name: step 2 - setup k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: step 3 - run k6 load test
+        uses: grafana/run-k6-action@v1
+        with:
+          path: |
+            ./tests/health.js
+          parallel: false # optional: run tests in parallel (default: false)
+          fail-fast: false # optional: fail the step early if any test fails (default: true)
+        
+      - run: ls & mkdir reports & mv report.html reports
+      
+      
+      - name: step 4 - upload artifact
+        uses: actions/upload-artifact@v4
+        with: 
+          name: report
+          path: reports
+
