@@ -32,6 +32,7 @@ Check then both to add both options in context menu.
 - [Grafana k6 REST and WS Play](https://test-api.k6.io/)
 - [HTTP request testing with k6](https://circleci.com/blog/http-request-testing-with-k6/#k6-test-structure)
 - [Performance testing with Grafana k6 and GitHub Actions](https://grafana.com/blog/2024/07/15/performance-testing-with-grafana-k6-and-github-actions/)
+- [utils](https://grafana.com/docs/k6/latest/javascript-api/jslib/utils/)
 
 # Tips:
 
