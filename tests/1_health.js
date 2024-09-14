@@ -11,15 +11,12 @@ export function handleSummary(data) {
 }
 
 export const options = {
-    stages: [
-        { duration: '10s', target: 2 },
-        { duration: '10s', target: 1 },
-        { duration: '5s', target: 2 }
-    ]
+    vus: 1,
+    duration: '1s'
 }
 
 export default function (){
-    const res = http.get('https://practice.expandtesting.com/notes/api/health-check')
+    let res = http.get('https://practice.expandtesting.com/notes/api/health-check')
     check(res.json(), { 'success was true': (r) => r.success === true,
                 'status was 200': (r) => r.status === 200,
                 'Message was "Notes API is Running"': (r) => r.message === "Notes API is Running"
