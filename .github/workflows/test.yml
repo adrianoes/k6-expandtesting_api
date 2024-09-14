@@ -20,12 +20,14 @@ jobs:
         uses: grafana/run-k6-action@v1
         with:
           path: |
-            ./tests/health.js
+            ./tests/1_health.js
+            ./tests/2_create_user.js
+            ./tests/3_login_user.js
+            ./tests/16_delete_user.js
           parallel: false # optional: run tests in parallel (default: false)
-          fail-fast: false # optional: fail the step early if any test fails (default: true)
+          fail-fast: false # optional: fail the step early if any test fails (default: true). Need to configure to execute all files and generate report for each
         
-      - run: ls & mkdir reports & mv report.html reports
-      
+      - run: ls & mkdir reports & mv report.html reports      
       
       - name: step 4 - upload artifact
         uses: actions/upload-artifact@v4
