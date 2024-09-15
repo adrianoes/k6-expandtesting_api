@@ -19,7 +19,7 @@ Check then both to add both options in context menu.
 
 # Tests:
 
-- Execute ```k6 run tests/health.js``` to run all tests in health test suite.
+- Navigate to k6-expandtesting_API/tests and execute ```k6 run tests/health.js``` to run health test.
 
 # Support:
 
@@ -33,8 +33,10 @@ Check then both to add both options in context menu.
 - [HTTP request testing with k6](https://circleci.com/blog/http-request-testing-with-k6/#k6-test-structure)
 - [Performance testing with Grafana k6 and GitHub Actions](https://grafana.com/blog/2024/07/15/performance-testing-with-grafana-k6-and-github-actions/)
 - [utils](https://grafana.com/docs/k6/latest/javascript-api/jslib/utils/)
+- [JSON formatter](https://jsonformatter.org/)
 
 # Tips:
 
 - UI and API tests to send password reset link to user's email and API tests to verify a password reset token and reset a user's password must be tested manually as they rely on e-mail verification. 
 - K6 documentation is pleasant to the readers eyes. Have a look calmly.
+- The github actions report will e generated for the last test file configured in the .yml file.
