@@ -67,15 +67,22 @@ export default function (){
                 'Content-Type': 'application/json'             
             }
         }
+    );
+    const note_id = res.json().data.id
+
+    res = http.del(
+        'https://practice.expandtesting.com/notes/api/notes/' + note_id,
+        null,
+        {
+            headers: {
+                'X-Auth-Token': user_token              
+            }
+        }
     );  
+    // console.log(res)
     check(res.json(), { 'success was true': (r) => r.success === true,
         'status was 200': (r) => r.status === 200,
-        'Message was "Note successfully created"': (r) => r.message === "Note successfully created",
-        'Note title is right': (r) => r.data.title === credentialsCN.title,
-        'Note description is right': (r) => r.data.description === credentialsCN.description,
-        'Note category is right': (r) => r.data.category === credentialsCN.category,
-        'Note completed is right': (r) => r.data.completed === false,
-        'User ID is right': (r) => r.data.user_id === user_id
+        'Message was "Note successfully deleted"': (r) => r.message === "Note successfully deleted"
     });
     sleep(1);
 

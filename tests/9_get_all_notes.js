@@ -122,7 +122,6 @@ export default function (){
     });
     sleep(1);
 
-
     res = http.del(
         'https://practice.expandtesting.com/notes/api/users/delete-account',
         null,

@@ -67,15 +67,31 @@ export default function (){
                 'Content-Type': 'application/json'             
             }
         }
+    );
+    const note_id = res.json().data.id
+    const note_created_at = res.json().data.created_at
+    const note_updated_at = res.json().data.updated_at
+
+    res = http.get(
+        'https://practice.expandtesting.com/notes/api/notes/' + note_id,
+        {
+            headers: {
+                'X-Auth-Token': user_token              
+            }
+        }
     );  
+    // console.log(res)
     check(res.json(), { 'success was true': (r) => r.success === true,
         'status was 200': (r) => r.status === 200,
-        'Message was "Note successfully created"': (r) => r.message === "Note successfully created",
+        'Message was "Note successfully retrieved"': (r) => r.message === "Note successfully retrieved",
+        'Note ID is right': (r) => r.data.id === note_id,
         'Note title is right': (r) => r.data.title === credentialsCN.title,
         'Note description is right': (r) => r.data.description === credentialsCN.description,
         'Note category is right': (r) => r.data.category === credentialsCN.category,
         'Note completed is right': (r) => r.data.completed === false,
-        'User ID is right': (r) => r.data.user_id === user_id
+        'Note created at is right': (r) => r.data.created_at === note_created_at,
+        'Note updated at is right': (r) => r.data.updated_at === note_updated_at,
+        'User ID in Note 1 is right': (r) => r.data.user_id === user_id
     });
     sleep(1);
 

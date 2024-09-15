@@ -29,6 +29,12 @@ jobs:
             ./tests/7_create_note.js
             ./tests/8_create_another_note.js
             ./tests/9_get_all_notes.js
+            ./tests/10_get_note.js
+            ./tests/11_update_note.js
+            ./tests/12_update_completeness_note.js
+            ./tests/13_delete_note.js
+            ./tests/14_logout_user.js
+            ./tests/15_login_user_after_logout.js
             ./tests/16_delete_user.js
           parallel: false # optional: run tests in parallel (default: false)
           fail-fast: false # optional: fail the step early if any test fails (default: true). Need to configure to execute all files and generate report for each
