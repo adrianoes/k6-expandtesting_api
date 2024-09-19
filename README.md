@@ -19,7 +19,7 @@ Check then both to add both options in context menu.
 
 # Tests:
 
-- Navigate to k6-expandtesting_API/tests and execute ```k6 run tests/health.js``` to run health test.
+- Navigate to k6-expandtesting_API/tests and execute ```k6 run .\1_health.js``` to run health test and have the report generated in root folder.
 
 # Support:
 
@@ -39,5 +39,6 @@ Check then both to add both options in context menu.
 
 - UI and API tests to send password reset link to user's email and API tests to verify a password reset token and reset a user's password must be tested manually as they rely on e-mail verification. 
 - K6 documentation is pleasant to the readers eyes. Have a look calmly.
-- The github actions report will be generated for the last test file configured in the .yml file. Negative tests were not added in the .yml file.
+- The github actions report will be generated for the last test file configured in the .yml file. 
 - K6 doesn't recognize wrong header content "'Content-Type': 'badRequest'" as a bad request.
+- It might be needed to increase credentials random length according to the test type.
