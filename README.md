@@ -41,4 +41,4 @@ Check then both to add both options in context menu.
 - K6 documentation is pleasant to the readers eyes. Have a look calmly.
 - The github actions report will be generated for the last test file configured in the .yml file. 
 - K6 doesn't recognize wrong header content "'Content-Type': 'badRequest'" as a bad request.
-- It might be needed to increase credentials random length according to the test type.
+- It might be needed to increase credentials length according to the test type.
