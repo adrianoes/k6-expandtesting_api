@@ -1,4 +1,4 @@
-# k6-expandtesting_UI_and_API
+# k6-expandtesting_API
 
 API testing in [expandtesting](https://practice.expandtesting.com/notes/api/api-docs/). This project contains basic examples on how to use K6 to test performance API tests. 
 
