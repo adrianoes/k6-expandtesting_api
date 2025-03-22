@@ -7,24 +7,30 @@ on:
     branches: [main]
 
 jobs:
- 
   windows-job:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Step to install K6 using Chocolatey package manager for Windows
+      - name: Install K6 (Windows)
+        run: |
+          choco install k6 # Installs K6 using Chocolatey
+
+      # Step to run all tests with the .bat file
       - name: Step 1 - Run all tests (Windows)
         run: |
-          .\running_all_tests.bat  # Executa todos os testes com o arquivo .bat
+          .\running_all_tests.bat  # Executes all tests with the .bat file
 
+      # Step to combine the generated reports
       - name: Step 2 - Combine test reports (Windows)
         run: |
-          .\combined_report.bat  # Combina todos os relatórios gerados
+          .\combined_report.bat  # Combines all generated reports
 
+      # Step to upload the combined report as an artifact
       - name: Step 3 - Upload the combined report as artifact
         uses: actions/upload-artifact@v4
         with:
           name: combined-report
-          path: reports/combined_report.html  
-
+          path: reports/combined_report.html  # Uploads the combined report file
