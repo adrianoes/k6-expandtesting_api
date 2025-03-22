@@ -6,7 +6,7 @@ export function handleSummary(data) {
     return {
       // "reports/report.html": htmlReport(data),
       // Still have to make it work for git hub actions with report outside tests folder. For now lets use below option
-        "report.html": htmlReport(data)
+        "reports/1_health.html": htmlReport(data)
     }
 }
 

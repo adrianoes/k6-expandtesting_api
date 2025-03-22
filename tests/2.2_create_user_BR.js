@@ -6,7 +6,7 @@ import { randomString } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js'
 export function handleSummary(data) {
     return {
       // "reports/report.html": htmlReport(data),
-        "report.html": htmlReport(data)
+        "reports/2.2_create_user_BR.html": htmlReport(data)
     };
 }
 

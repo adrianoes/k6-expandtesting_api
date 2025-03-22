@@ -7,7 +7,7 @@ import { randomItem } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 export function handleSummary(data) {
     return {
       // "reports/report.html": htmlReport(data),
-        "report.html": htmlReport(data)
+        "reports/13.2_delete_note_BR.html": htmlReport(data)
     };
 }
 

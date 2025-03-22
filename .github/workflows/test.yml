@@ -1,70 +1,33 @@
-name: K6 load test
+name: K6 Load Test
 
 on:
-    push:
-      branches: [ main ]
-    pull_request:
-      branches: [ main ]
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
   protocol:
     runs-on: ubuntu-latest
     steps:
-      - name: step 1 - checkout
+      - name: Step 1 - Checkout repository
         uses: actions/checkout@v4
 
-      - name: step 2 - setup k6
+      - name: Step 2 - Setup K6
         uses: grafana/setup-k6-action@v1
 
-      - name: step 3 - run k6 load test
-        uses: grafana/run-k6-action@v1
-        with:
-          path: |
-            ./tests/1_health.js
-            ./tests/2.1_create_user.js
-            ./tests/2.2_create_user_BR.js
-            ./tests/3.1_login_user.js
-            ./tests/3.2_login_user_BR.js
-            ./tests/3.3_login_user_UR.js
-            ./tests/4.1_retrieve_user.js
-            ./tests/4.2_retrieve_user_UR.js
-            ./tests/5.1_update_user.js
-            ./tests/5.2_update_user_BR.js
-            ./tests/5.3_update_user_UR.js
-            ./tests/6.1_change_password.js
-            ./tests/6.2_change_password_BR.js
-            ./tests/6.3_change_password_UR.js
-            ./tests/7.1_create_note.js
-            ./tests/7.2_create_note_BR.js
-            ./tests/7.3_create_note_UR.js
-            ./tests/8_create_another_note.js
-            ./tests/9.1_get_all_notes.js
-            ./tests/9.2_get_all_notes_UR.js
-            ./tests/10.1_get_note.js
-            ./tests/10.2_get_note_BR.js
-            ./tests/10.3_get_note_UR.js
-            ./tests/11.1_update_note.js
-            ./tests/11.2_update_note_BR.js
-            ./tests/11.3_update_note_UR.js
-            ./tests/12.1_update_completeness_note.js
-            ./tests/12.2_update_completeness_note_BR.js
-            ./tests/12.3_update_completeness_note_UR.js
-            ./tests/13.1_delete_note.js
-            ./tests/13.2_delete_note_BR.js
-            ./tests/13.3_delete_note_UR.js
-            ./tests/14.1_logout_user.js
-            ./tests/14.2_logout_user_UR.js
-            ./tests/15_login_user_after_logout.js
-            ./tests/16.1_delete_user.js
-            ./tests/16.2_delete_user_UR.js
-          parallel: false # optional: run tests in parallel (default: false)
-          fail-fast: false # optional: fail the step early if any test fails (default: true). Need to configure to execute all files and generate report for each
-        
-      - run: ls & mkdir reports & mv report.html reports      
-      
-      - name: step 4 - upload artifact
-        uses: actions/upload-artifact@v4
-        with: 
-          name: report
-          path: reports
+      - name: Step 3 - Run all K6 tests
+        run: |
+          chmod +x running_all_tests.bat
+          ./running_all_tests.bat
 
+      - name: Step 4 - Combine test reports
+        run: |
+          chmod +x combined_report.bat
+          ./combined_report.bat
+
+      - name: Step 5 - Upload combined report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: combined-report
+          path: reports/combined_report.html
