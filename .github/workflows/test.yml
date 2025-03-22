@@ -7,31 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  protocol:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Step 1 - Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Step 2 - Setup K6
-        uses: grafana/setup-k6-action@v1
-
-      - name: Step 3 - Run all K6 tests (Linux)
-        run: |
-          chmod +x running_all_tests.bat
-          wine cmd.exe /c running_all_tests.bat
-
-      - name: Step 4 - Combine test reports (Linux)
-        run: |
-          chmod +x combined_report.bat
-          wine cmd.exe /c combined_report.bat
-
-      - name: Step 5 - Upload combined report as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: combined-report
-          path: reports/combined_report.html
-
+ 
   windows-job:
     runs-on: windows-latest
     steps:
@@ -40,14 +16,15 @@ jobs:
 
       - name: Step 1 - Run all tests (Windows)
         run: |
-          .\running_all_tests.bat
+          .\running_all_tests.bat  # Executa todos os testes com o arquivo .bat
 
       - name: Step 2 - Combine test reports (Windows)
         run: |
-          .\combined_report.bat
+          .\combined_report.bat  # Combina todos os relatórios gerados
 
       - name: Step 3 - Upload the combined report as artifact
         uses: actions/upload-artifact@v4
         with:
           name: combined-report
-          path: reports/combined_report.html
+          path: reports/combined_report.html  
+
