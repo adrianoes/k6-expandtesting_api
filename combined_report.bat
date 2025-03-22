@@ -1,6 +1,8 @@
 @echo off
 setlocal enabledelayedexpansion
 
+
+
 :: Define the path for the combined report
 set COMBINED_REPORT=.\reports\combined_report.html
 
