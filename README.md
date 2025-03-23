@@ -42,4 +42,4 @@ Check then both to add both options in context menu.
 - UI and API tests to send password reset link to user's email and API tests to verify a password reset token and reset a user's password must be tested manually as they rely on e-mail verification. 
 - K6 documentation is pleasant to the readers eyes. Have a look calmly.
 - Use support .bat files for a better experience. 
-- Deeper knowledge/logic to rearrange reports html is required to combine reports. Combined_reports.bat needs adjustments.
+- Deeper knowledge/logic to rearrange reports html is required to combine reports. The combined_reports.bat file needs adjustments.
