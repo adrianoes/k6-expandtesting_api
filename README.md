@@ -1,4 +1,4 @@
-# k6-expandtesting_API
+# k6-expandtesting_api
 
 API testing in [expandtesting](https://practice.expandtesting.com/notes/api/api-docs/). This project contains basic examples on how to use K6 to test performance API tests. 
 
@@ -19,9 +19,9 @@ Check then both to add both options in context menu.
 
 # Tests:
 
-- Navigate to k6-expandtesting_API/tests and execute ```k6 run .\1_health.js``` to run health test and have the report generated in root folder.
-- Using CMD, navigate to k6-expandtesting_API/tests, execute ```run_all_tests.bat``` to run all tests at once. Check reports folder after test execution.
-<!-- - Using CMD, navigate to k6-expandtesting_API/tests, execute ```run_all_tests.bat``` to run all tests at once and execute ```combined_report.bat``` to combine all the reports. Check reports folder after test execution. -->
+- Navigate to k6-expandtesting_api/tests and execute ```k6 run .\1_health.js``` to run health test and have the report generated in root folder.
+- Using CMD, navigate to k6-expandtesting_api/tests, execute ```run_all_tests.bat``` to run all tests at once. Check reports folder after test execution.
+<!-- - Using CMD, navigate to k6-expandtesting_api/tests, execute ```run_all_tests.bat``` to run all tests at once and execute ```combined_report.bat``` to combine all the reports. Check reports folder after test execution. -->
 
 # Support:
 
