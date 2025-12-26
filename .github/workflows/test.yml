@@ -21,12 +21,12 @@ jobs:
       # Step to run all tests with the .bat file
       - name: Step 1 - Run all tests (Windows)
         run: |
-          .\running_all_tests.bat  # Executes all tests with the .bat file
+          .\run_all_tests.bat  # Executes all tests with the .bat file
 
-      # # Step to combine the generated reports
-      # - name: Step 2 - Combine test reports (Windows)
-      #   run: |
-      #     .\combined_report.bat  # Combines all generated reports
+      # Step to combine the generated reports
+      - name: Step 2 - Combine test reports (Windows)
+        run: |
+          .\combined_report.bat  # Combines all generated reports
 
       # Step to upload the reports folder as artifact
       - name: Step 2 - Upload the reports as artifact

@@ -4,10 +4,11 @@ API testing in [expandtesting](https://practice.expandtesting.com/notes/api/api-
 
 # Pre-requirements:
 
-| Requirement                     | Version        | Note                                                            |
-| :------------------------------ |:---------------| :-------------------------------------------------------------- |
-| Visual Studio Code              | 1.89.1         | -                                                               |
-| K6                              | 0.53.0         | -                                                               | 
+| Requirement                     | Version        | Note                 |
+| :------------------------------ |:---------------| :------------------- |
+| Visual Studio Code              | 1.107.1        | -                    |
+| K6                              | 1.4.0          | -                    | 
+| GitHub Copilot Chat             | 0.35.2         | -                    | 
 
 # Installation:
 
@@ -19,9 +20,8 @@ Check then both to add both options in context menu.
 
 # Tests:
 
-- Navigate to k6-expandtesting_api/tests and execute ```k6 run .\1_health.js``` to run health test and have the report generated in root folder.
-- Using CMD, navigate to k6-expandtesting_api/tests, execute ```run_all_tests.bat``` to run all tests at once. Check reports folder after test execution.
-<!-- - Using CMD, navigate to k6-expandtesting_api/tests, execute ```run_all_tests.bat``` to run all tests at once and execute ```combined_report.bat``` to combine all the reports. Check reports folder after test execution. -->
+- Using CMD, navigate to C:\k6-expandtesting_api\tests and execute ```k6 run .\TC001_health.js``` to run health test and have the report generated in root folder.
+- Using CMD, navigate to C:\k6-expandtesting_api and execute ```run_all_tests.bat``` to run all tests at once. Check reports folder after test execution. Using CMD, navigate to C:\k6-expandtesting_api and execute ```combined_report.bat``` to generate a single consolidated HTML report.
 
 # Support:
 
@@ -36,10 +36,10 @@ Check then both to add both options in context menu.
 - [Performance testing with Grafana k6 and GitHub Actions](https://grafana.com/blog/2024/07/15/performance-testing-with-grafana-k6-and-github-actions/)
 - [utils](https://grafana.com/docs/k6/latest/javascript-api/jslib/utils/)
 - [JSON formatter](https://jsonformatter.org/)
+- [GitHub Copilot in VS Code](https://code.visualstudio.com/docs/copilot/overview)
 
 # Tips:
 
 - UI and API tests to send password reset link to user's email and API tests to verify a password reset token and reset a user's password must be tested manually as they rely on e-mail verification. 
 - K6 documentation is pleasant to the readers eyes. Have a look calmly.
 - Use support .bat files for a better experience. 
-- Deeper knowledge/logic to rearrange reports html is required to combine reports. The combined_reports.bat file needs adjustments.

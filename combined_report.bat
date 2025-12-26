@@ -1,4 +1,31 @@
 @echo off
+REM combined_report.bat
+REM Invokes the PowerShell combiner to build a timestamped general report
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\combine_reports.ps1"
+
+if %ERRORLEVEL% EQU 0 (
+  echo Combined report created.
+) else (
+  echo Failed to create combined report (exit %ERRORLEVEL%).
+)
+
+pause
+@echo off
+REM combined_report.bat
+REM Combines all HTML reports in the reports\ folder into a single
+REM reports\general_report.html by invoking a PowerShell helper script.
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\combine_reports.ps1"
+
+if %ERRORLEVEL% EQU 0 (
+  echo general_report.html created in reports\
+) else (
+  echo Failed to create general_report.html (exit %ERRORLEVEL%)
+)
+
+pause
+@echo off
 setlocal enabledelayedexpansion
 
 
