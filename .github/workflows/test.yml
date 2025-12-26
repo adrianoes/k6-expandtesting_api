@@ -20,12 +20,13 @@ jobs:
       - name: Run all tests (Windows)
         shell: cmd
         run: |
-          run_all_tests.bat
+          .\run_all_tests.bat
 
       - name: Combine test reports (Windows)
-        shell: cmd
+        shell: pwsh
         run: |
-          combined_report.bat
+          # Call the PowerShell combiner directly to avoid CMD batch parsing issues
+          pwsh -NoProfile -ExecutionPolicy Bypass -File "$PWD\scripts\combine_reports.ps1"
 
       - name: Upload the reports as artifact
         uses: actions/upload-artifact@v4
