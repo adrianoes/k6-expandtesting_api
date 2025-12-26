@@ -20,8 +20,11 @@ Check then both to add both options in context menu.
 
 # Tests:
 
-- Using CMD, navigate to C:\k6-expandtesting_api\tests and execute ```k6 run .\TC001_health.js``` to run health test and have the report generated in root folder.
-- Using CMD, navigate to C:\k6-expandtesting_api and execute ```run_all_tests.bat``` to run all tests at once. Check reports folder after test execution. Using CMD, navigate to C:\k6-expandtesting_api and execute ```combined_report.bat``` to generate a single consolidated HTML report.
+- Using CMD, navigate to C:\k6-expandtesting_api\tests and execute ```k6 run TC001_health.js``` to run health test and have the report generated in reports folder.
+- Using CMD, navigate to C:\k6-expandtesting_api\tests and execute ```..\run_all_tests.bat``` to run all tests at once. Check reports folder after test execution. Using CMD, navigate to C:\k6-expandtesting_api\tests and execute ```..\combined_report.bat``` to generate a single consolidated HTML report.
+- All tests are tagged. Tags are full, basic and negative. Using CMD, navigate to C:\k6-expandtesting_api\tests and execute ```for %f in (*.js) do @findstr /I "basic" "%f" >nul && k6 run "%f"``` command to run all the tests tagged as basic.
+- Using CMD, navigate to C:\k6-expandtesting_api\tests and execute ```..\run_tc.bat TC001``` or ```..\run_tc.bat 001``` to run TC001_health.js test and have the report generated in reports folder. 
+- Using CMD, navigate to C:\k6-expandtesting_api\tests and execute ```..\run_tc.bat 001 020 140``` to run TC001_health.js, TC020_create_user_BR.js, TC140_create_note.js tests and have the reports generated in reports folder. 
 
 # Support:
 
@@ -37,6 +40,7 @@ Check then both to add both options in context menu.
 - [utils](https://grafana.com/docs/k6/latest/javascript-api/jslib/utils/)
 - [JSON formatter](https://jsonformatter.org/)
 - [GitHub Copilot in VS Code](https://code.visualstudio.com/docs/copilot/overview)
+- [Tags and Groups](https://grafana.com/docs/k6/latest/using-k6/tags-and-groups/)
 
 # Tips:
 

@@ -5,8 +5,8 @@ import { randomString } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js'
 
 export function handleSummary(data) {
     return {
-      // "reports/report.html": htmlReport(data),
-                "reports/TC030_login_user.html": htmlReport(data)
+        // "reports/report.html": htmlReport(data),
+        "../reports/TC030_login_user.html": htmlReport(data)
     };
 }
 
@@ -15,6 +15,8 @@ export const options = {
     vus: 1,
     duration: '30s'
 }
+
+export const tags = { full: 'true', basic: 'true' }
 
 // // for load test, reply below script in every test
 // export const options = {

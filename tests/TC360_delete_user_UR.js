@@ -4,10 +4,10 @@ import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporte
 import { randomString } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js'
 
 export function handleSummary(data) {
-    return {
-      // "reports/report.html": htmlReport(data),
-                "reports/TC360_delete_user_UR.html": htmlReport(data)
-    };
+        return {
+            // "reports/report.html": htmlReport(data),
+            "../reports/TC360_delete_user_UR.html": htmlReport(data)
+        };
 }
 
 // for smoke test, reply below script in every test
@@ -15,6 +15,8 @@ export const options = {
     vus: 1,
     duration: '30s'
 }
+
+export const tags = { full: 'true', negative: 'true' }
 
 // // for load test, reply below script in every test
 // export const options = {

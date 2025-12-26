@@ -1,8 +1,11 @@
 @echo off
 
-if not exist ".\reports" mkdir ".\reports"
+pushd tests
+if not exist "..\reports" mkdir "..\reports"
 
-for %%f in (.\tests\*.js) do (
+for %%f in (*.js) do (
     echo Running the test: %%f
-    k6 run %%f
+    k6 run "%%f"
 )
+
+popd

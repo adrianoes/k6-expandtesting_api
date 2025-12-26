@@ -5,8 +5,8 @@ import { randomString } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js'
 
 export function handleSummary(data) {
     return {
-      // "reports/report.html": htmlReport(data),
-                "reports/TC050_login_user_UR.html": htmlReport(data)
+        // "reports/report.html": htmlReport(data),
+        "../reports/TC050_login_user_UR.html": htmlReport(data)
     };
 }
 
@@ -15,6 +15,8 @@ export const options = {
     vus: 1,
     duration: '30s'
 }
+
+export const tags = { full: 'true', negative: 'true' }
 
 // // for load test, reply below script in every test
 // export const options = {
@@ -113,13 +115,13 @@ export default function (){
     sleep(1);
     const user_id = res.json().data.id
 
-    const credentialsLUBR = {
+    const credentialsLUUR = {
         email: credentials.email,        
         password: '@'+credentials.password
     }
     res = http.post(
         'https://practice.expandtesting.com/notes/api/users/login',
-        JSON.stringify(credentialsLUBR),
+        JSON.stringify(credentialsLUUR),
         {
             headers: {
                 'Content-Type': 'application/json'

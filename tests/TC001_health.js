@@ -3,11 +3,10 @@ import { check, sleep } from 'k6'
 import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js"
 
 export function handleSummary(data) {
-    return {
-      // "reports/report.html": htmlReport(data),
-      // Still have to make it work for git hub actions with report outside tests folder. For now lets use below option
-                "reports/TC001_health.html": htmlReport(data)
-    }
+        return {
+            // "reports/report.html": htmlReport(data),
+            "../reports/TC001_health.html": htmlReport(data)
+        };
 }
 
 // for smoke test, reply below script in every test
@@ -15,6 +14,8 @@ export const options = {
     vus: 1,
     duration: '30s'
 }
+
+export const tags = { full: 'true', basic: 'true' }
 
 // // for load test, reply below script in every test
 // export const options = {
