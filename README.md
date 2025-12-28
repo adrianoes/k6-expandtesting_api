@@ -20,11 +20,11 @@ Check then both to add both options in context menu.
 
 # Tests:
 
-- Using PowerShell, navigate to C:\k6-expandtesting_api\tests and execute ```..\run_all_tests.bat``` to run all tests at once. Check reports folder after test execution. Using CMD, navigate to C:\k6-expandtesting_api\tests and execute ```..\combined_report.bat``` to generate a single consolidated HTML report.
+- Using PowerShell, navigate to C:\k6-expandtesting_api\tests and execute ```..\run_all_tests.bat``` to run all tests at once. Check the reports folder after test execution. Using CMD, navigate to C:\k6-expandtesting_api\tests and execute ```..\combined_report.bat``` to generate a single consolidated HTML report. Alternatively, run ```..\run_all_tests.bat load``` to execute all tests using the load profile. Available profiles: smoke, load, stress, spike, breakpoint, and soak. If no option is chosen, tests run as smoke tests. This applies to all test execution commands in this section.
 - All tests are tagged. Tags are full, basic and negative. Using PowerShell, navigate to C:\k6-expandtesting_api\tests and execute the ```Get-ChildItem *.js | ForEach-Object { if (Select-String -Path $_.Name -Pattern "basic" -Quiet) { k6 run $_.Name } }``` command to run all tests tagged as basic.
 - Using PowerShell, navigate to C:\k6-expandtesting_api\tests and execute ```..\run_tc.bat TC001``` or ```..\run_tc.bat 001``` to run TC001_health.js test and have the report generated in reports folder. 
 - Using PowerShell, navigate to C:\k6-expandtesting_api\tests and execute ```..\run_tc.bat 001 020 140``` to run TC001_health.js, TC020_create_user_BR.js, TC140_create_note.js tests and have the reports generated in reports folder. 
-- To use Jira reporter, execute the ```..\set_jira_env.bat``` command and then run the desired test. If any checks fail, a bug will be automatically created in Jira. 
+- To use Jira reporter, using PowerShell, navigate to C:\k6-expandtesting_api\tests and execute the ```..\set_jira_env.bat``` command and then run the desired test. If any checks fail, a bug will be automatically created in Jira. 
 
 # Support:
 

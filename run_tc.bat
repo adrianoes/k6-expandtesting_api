@@ -1,9 +1,12 @@
 @echo off
 REM run_tc.bat
-REM Usage: run_tc.bat TC001 TC020 140  etc. You can pass IDs with or without the TC prefix.
+REM Usage: run_tc.bat TC001 [TC020 ...] [smoke|load|stress|spike|breakpoint|soak]
+REM        run_tc.bat 001 020 [smoke|load|stress|spike|breakpoint|soak]
+REM Default test type: smoke
 
 if "%~1"=="" (
-  echo Usage: %~nx0 TC001 [TC020 ...]  or  %~nx0 001 020
+  echo Usage: %~nx0 TC001 [TC020 ...] [smoke^|load^|stress^|spike^|breakpoint^|soak]
+  echo        %~nx0 001 020 [smoke^|load^|stress^|spike^|breakpoint^|soak]
   exit /b 1
 )
 
@@ -12,23 +15,44 @@ pushd "%~dp0tests" || (echo Failed to change directory to %~dp0tests && exit /b 
 if not exist "..\reports" mkdir "..\reports"
 
 setlocal enabledelayedexpansion
-for %%a in (%*) do (
-    set "a=%%~a"
-    set "first=!a:~0,2!"
-    if /I "!first!"=="TC" (
-        set "pat=!a!*.js"
-    ) else (
-        set "pat=TC!a!*.js"
-    )
 
-    set "found=0"
-    for %%f in (!pat!) do (
-        set "found=1"
-        set "TESTNAME=%%~nf"
-        echo Running %%f
-        k6 run --env K6_TEST_NAME=!TESTNAME! "%%f"
+REM Default profile
+set "K6_TEST_TYPE=smoke"
+
+REM First pass: detect profile token(s)
+for %%a in (%*) do (
+    set "tok=%%~a"
+    for %%p in (smoke load stress spike breakpoint soak) do (
+        if /I "!tok!"=="%%p" (
+            set "K6_TEST_TYPE=%%p"
+        )
     )
-    if "!found!"=="0" echo No test files found for pattern: !pat!
+)
+
+REM Second pass: run tests for non-profile tokens
+for %%a in (%*) do (
+    set "tok=%%~a"
+    set "IS_TYPE="
+    for %%p in (smoke load stress spike breakpoint soak) do (
+        if /I "!tok!"=="%%p" set "IS_TYPE=1"
+    )
+    if not defined IS_TYPE (
+        set "first=!tok:~0,2!"
+        if /I "!first!"=="TC" (
+            set "pat=!tok!*.js"
+        ) else (
+            set "pat=TC!tok!*.js"
+        )
+
+        set "found=0"
+        for %%f in (!pat!) do (
+            set "found=1"
+            set "TESTNAME=%%~nf"
+            echo Running %%f with profile: !K6_TEST_TYPE!
+            k6 run --env K6_TEST_NAME=!TESTNAME! --env K6_TEST_TYPE=!K6_TEST_TYPE! "%%f"
+        )
+        if "!found!"=="0" echo No test files found for pattern: !pat!
+    )
 )
 endlocal
 popd

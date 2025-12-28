@@ -1,7 +1,15 @@
 @echo off
 REM run_all_tests.bat
+REM Usage: run_all_tests.bat [smoke|load|stress|spike|breakpoint|soak]
+REM Default: smoke
 
 setlocal enabledelayedexpansion
+
+REM Get test type from argument or default to 'smoke'
+set "K6_TEST_TYPE=%1"
+if not defined K6_TEST_TYPE set "K6_TEST_TYPE=smoke"
+
+echo Test type: !K6_TEST_TYPE!
 
 REM Load Jira environment variables from GitHub secret or local file
 if defined JIRA_API_SECRETS (
@@ -30,8 +38,8 @@ if not exist "..\reports" mkdir "..\reports"
 
 for %%f in (*.js) do (
     set "TESTNAME=%%~nf"
-    echo Running the test: %%f
-    k6 run --env K6_TEST_NAME=!TESTNAME! "%%f"
+    echo Running the test: %%f with profile: !K6_TEST_TYPE!
+    k6 run --env K6_TEST_NAME=!TESTNAME! --env K6_TEST_TYPE=!K6_TEST_TYPE! "%%f"
 )
 
 popd

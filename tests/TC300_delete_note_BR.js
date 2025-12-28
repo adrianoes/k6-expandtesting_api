@@ -4,100 +4,24 @@ import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporte
 import { randomString } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js'
 import { randomItem } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 import { handleSummary as jiraSummary } from '../support/k6-jira-reporter.js'
+import { getTestOptions } from '../support/test-options.js'
 
 export function handleSummary(data) {
         jiraSummary(data);
         return {
-            // "reports/report.html": htmlReport(data),
-            "../reports/TC300_delete_note_BR.html": htmlReport(data)
+              // "reports/report.html": htmlReport(data),
+              "../reports/TC300_delete_note_BR.html": htmlReport(data)
         };
 }
 
-// for smoke test, reply below script in every test
-export const options = {
-    vus: 1,
-    duration: '30s'
-}
+// Get test options from environment or default to 'smoke'
+const testType = __ENV.K6_TEST_TYPE || 'smoke';
+export const options = getTestOptions(testType);
 
-export const tags = { full: 'true', negative: 'true' }
 
-// // for load test, reply below script in every test
-// export const options = {
-//     stages: [
-//         {
-//             duration: '10s',
-//             target: 10
-//         },
-//         {
-//             duration: '30s',
-//             target: 10
-//         },
-//         {
-//             duration: '10s',
-//             target: 0
-//         }       
-//     ]
-// }
 
-// // for stress test, reply below script in every test
-// export const options = {
-//     stages: [
-//         {
-//             duration: '10s',
-//             target: 1000
-//         },
-//         {
-//             duration: '30s',
-//             target: 1000
-//         },
-//         {
-//             duration: '10s',
-//             target: 0
-//         }       
-//     ]
-// }
 
-// // for spike test, reply below script in every test
-// export const options = {
-//     stages: [
-//         {
-//             duration: '2m',
-//             target: 10000
-//         },
-//         {
-//             duration: '1m',
-//             target: 0
-//         }    
-//     ]
-// }
 
-// // for breakpoint test, reply below script in every test
-// export const options = {
-//     stages: [
-//         {
-//             duration: '2h',
-//             target: 10000
-//         }  
-//     ]
-// }
-
-// // for soak test, reply below script in every test
-// export const options = {
-//     stages: [
-//         {
-//             duration: '5m',
-//             target: 1000
-//         },
-//         {
-//             duration: '24h',
-//             target: 1000
-//         },
-//         {
-//             duration: '5m',
-//             target: 0
-//         }       
-//     ]
-// }
 
 export default function (){
 
