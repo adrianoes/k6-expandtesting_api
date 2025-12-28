@@ -1,12 +1,17 @@
 ﻿import http from 'k6/http'
 import { check, sleep } from 'k6'
 import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js"
+import { handleSummary as jiraSummary } from '../support/k6-jira-reporter.js'
 
 export function handleSummary(data) {
-        return {
-            // "reports/report.html": htmlReport(data),
-            "../reports/TC001_health.html": htmlReport(data)
-        };
+    // Gera o report HTML normalmente
+    const reports = {
+        '../reports/TC001_health.html': htmlReport(data),
+    };
+    // Chama o handler do Jira (cria bug se houver falha)
+    jiraSummary(data);
+    // Retorna os reports normalmente
+    return reports;
 }
 
 // for smoke test, reply below script in every test

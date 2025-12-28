@@ -19,6 +19,8 @@ jobs:
 
       - name: Run all tests (Windows)
         shell: cmd
+        env:
+          JIRA_API_SECRETS: ${{ secrets.JIRA_API_SECRETS }}
         run: |
           .\run_all_tests.bat
 

@@ -24,8 +24,9 @@ for %%a in (%*) do (
     set "found=0"
     for %%f in (!pat!) do (
         set "found=1"
+        set "TESTNAME=%%~nf"
         echo Running %%f
-        k6 run "%%f"
+        k6 run --env K6_TEST_NAME=!TESTNAME! "%%f"
     )
     if "!found!"=="0" echo No test files found for pattern: !pat!
 )

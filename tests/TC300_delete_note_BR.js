@@ -3,8 +3,10 @@ import { check, sleep } from 'k6'
 import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js"
 import { randomString } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js'
 import { randomItem } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
+import { handleSummary as jiraSummary } from '../support/k6-jira-reporter.js'
 
 export function handleSummary(data) {
+        jiraSummary(data);
         return {
             // "reports/report.html": htmlReport(data),
             "../reports/TC300_delete_note_BR.html": htmlReport(data)

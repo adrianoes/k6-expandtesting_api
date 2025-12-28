@@ -4,8 +4,10 @@ import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporte
 import { randomString } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js'
 import { randomItem } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 import { createUserAndLogin, createNote, deleteAccount } from '../support/custom_commands.js'
+import { handleSummary as jiraSummary } from '../support/k6-jira-reporter.js'
 
 export function handleSummary(data) {
+        jiraSummary(data);
         return {
               // "reports/report.html": htmlReport(data),
               "../reports/TC230_update_note.html": htmlReport(data)
