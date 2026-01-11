@@ -25,7 +25,7 @@ export default function (){
     let res = http.get('https://practice.expandtesting.com/notes/api/health-check')
     check(res.json(), { 'success was true': (r) => r.success === true,
                 'status was 200': (r) => r.status === 200,
-                'Message was "Notes API is Running"': (r) => r.message === "Notes API is Running"
+                'Message was "Notes API is Running"': (r) => r.message === "Notes API is Runningy"
     })
     sleep(1)    
     // console.log(res)

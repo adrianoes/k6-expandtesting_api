@@ -5,6 +5,7 @@
 
 import http from 'k6/http';
 import encoding from 'k6/encoding';
+import { htmlReport } from 'https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js';
 
 function requiredEnv(name) {
     const v = __ENV[name];
@@ -67,6 +68,12 @@ function createJiraIssue(env, summary, description) {
             issuetype: { name: env.issueType },
             summary,
             description,
+            labels: [
+                'api-test',
+                'api-performance-test',
+                'automated-test',
+                'k6',
+            ],
         },
     });
     console.log('[k6-jira-reporter] Payload prepared');
@@ -90,6 +97,36 @@ function createJiraIssue(env, summary, description) {
     }
     console.log(`[k6-jira-reporter] Created Jira issue ${json.key}`);
     return json.key;
+}
+
+function attachReportToIssue(env, issueKey, fileName, htmlContent) {
+    try {
+        const url = `${env.baseUrl}/rest/api/2/issue/${issueKey}/attachments`;
+        const boundary = '----K6FormBoundary' + Date.now();
+
+        let body = '';
+        body += `--${boundary}\r\n`;
+        body += `Content-Disposition: form-data; name="file"; filename="${fileName}"\r\n`;
+        body += `Content-Type: text/html\r\n\r\n`;
+        body += htmlContent;
+        body += `\r\n--${boundary}--\r\n`;
+
+        const res = http.post(url, body, {
+            headers: {
+                Authorization: basicAuthHeader(env.email, env.apiToken),
+                'Content-Type': `multipart/form-data; boundary=${boundary}`,
+                'X-Atlassian-Token': 'no-check',
+            },
+            timeout: '30s',
+        });
+        if (res.status === 200) {
+            console.log(`[k6-jira-reporter] HTML report attached to ${issueKey}`);
+        } else {
+            console.warn(`[k6-jira-reporter] Failed to attach report: status=${res.status}`);
+        }
+    } catch (e) {
+        console.warn(`[k6-jira-reporter] Error attaching report: ${String(e)}`);
+    }
 }
 
 export function handleSummary(data) {
@@ -130,7 +167,19 @@ export function handleSummary(data) {
                 failedChecksDetails,
             });
 
-            createJiraIssue(env, summary, description);
+            // Gera o HTML do report no próprio handleSummary para anexar
+            let html = '';
+            try {
+                html = htmlReport(data) || '';
+            } catch (e) {
+                console.warn('[k6-jira-reporter] Failed to generate HTML report for attachment');
+            }
+
+            const key = createJiraIssue(env, summary, description);
+            if (key && html) {
+                const fileName = `${testName}.html`;
+                attachReportToIssue(env, key, fileName, html);
+            }
         } else {
             console.log('[k6-jira-reporter] No failed checks detected; skipping issue creation');
         }

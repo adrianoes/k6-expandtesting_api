@@ -18,13 +18,28 @@ API testing in [expandtesting](https://practice.expandtesting.com/notes/api/api-
 Check then both to add both options in context menu.
 - See [K6 page](https://grafana.com/docs/k6/latest/set-up/install-k6/) and install it by downloading and executing the latest installer. Perform the installation by letting all the preferenced configurations unchanged. 
 
-# Tests:
+# Tests
 
-- Using PowerShell, navigate to C:\k6-expandtesting_api\tests and execute ```..\run_all_tests.bat``` to run all tests at once. Check the reports folder after test execution. Using CMD, navigate to C:\k6-expandtesting_api\tests and execute ```..\combined_report.bat``` to generate a single consolidated HTML report. Alternatively, run ```..\run_all_tests.bat load``` to execute all tests using the load profile. Available profiles: smoke, load, stress, spike, breakpoint, and soak. If no option is chosen, tests run as smoke tests. This applies to all test execution commands in this section.
-- All tests are tagged. Tags are full, basic and negative. Using PowerShell, navigate to C:\k6-expandtesting_api\tests and execute the ```Get-ChildItem *.js | ForEach-Object { if (Select-String -Path $_.Name -Pattern "basic" -Quiet) { k6 run $_.Name } }``` command to run all tests tagged as basic.
-- Using PowerShell, navigate to C:\k6-expandtesting_api\tests and execute ```..\run_tc.bat TC001``` or ```..\run_tc.bat 001``` to run TC001_health.js test and have the report generated in reports folder. 
-- Using PowerShell, navigate to C:\k6-expandtesting_api\tests and execute ```..\run_tc.bat 001 020 140``` to run TC001_health.js, TC020_create_user_BR.js, TC140_create_note.js tests and have the reports generated in reports folder. 
-- To use Jira reporter, using PowerShell, navigate to C:\k6-expandtesting_api\tests and execute the ```..\set_jira_env.bat``` command and then run the desired test. If any checks fail, a bug will be automatically created in Jira. 
+- First, set Jira variables (once per session): from the tests directory run ```. ..\set_jira_env.ps1```
+- Run all tests (default smoke):
+    - From tests: ```..\run_all_tests.bat```
+    - With profile (from tests): ```..\run_all_tests.bat load``` (profiles: smoke, load, stress, spike, breakpoint, soak)
+- Run specific tests (without Jira):
+    - Single (from tests): ```..\run_tc.bat 001 smoke```
+    - Multiple (from tests): ```..\run_tc.bat 001 020 140 load```
+ Run specific tests with Jira issue + HTML report attached (automatic):
+     - Prerequisite: variables set with ```. ..\set_jira_env.ps1```
+     - From tests: ```. ..\run_test.ps1 -TestIds 001,020 -Profile smoke```
+     - Outcome: creates Jira issues for failures and attaches the matching HTML in reports/.
+ Run all tests with Jira issue + HTML report attached (automatic):
+     - Prerequisite: variables set with ```. ..\set_jira_env.ps1```
+     - From tests (default smoke): ```. ..\run_test.ps1 -AllTests```
+     - From tests with profile: ```. ..\run_test.ps1 -AllTests -Profile load```
+ Default profile note: if -Profile is omitted, tests run as smoke.
+- Default profile note: if -Profile is omitted, tests run as smoke.
+- Filter by tag (e.g., basic): from tests run ```Get-ChildItem *.js | ForEach-Object { if (Select-String -Path $_.Name -Pattern "basic" -Quiet) { k6 run $_.Name } }```
+- Consolidate HTMLs (optional, CMD): from tests run ```..\combined_report.bat```
+- Reports: generated in ```reports/```; filenames follow the pattern TCxxx_*.html.
 
 # Support:
 
@@ -44,6 +59,7 @@ Check then both to add both options in context menu.
 
 # Tips:
 
+- **Important:** Before using the Jira reporter, you must source the ```..\ set_jira_env.ps1``` script from the C:\k6-expandtesting_api\tests directory using dot-sourcing: ```. ..\ set_jira_env.ps1```. This sets the required Jira environment variables (JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN, JIRA_PROJECT_KEY) for the current PowerShell session. Run this once per session before executing tests. Copy `set_jira_env.example.ps1` to `set_jira_env.ps1`, fill in your Jira credentials, and keep `set_jira_env.ps1` private (it's ignored by git).
 - If the automatic Jira issue creation during test execution fails or doesn't trigger, use the backup script create_jira_issues_from_reports.ps1. This script scans the reports/ folder, parses HTML test reports, and creates Jira issues for any failed checks. Navigate to C:\k6-expandtesting_api\tests and execute ```..\create_jira_issues_from_reports.ps1``` after running tests. This is useful for retrying failed issue creations.
 - UI and API tests to send password reset link to user's email and API tests to verify a password reset token and reset a user's password must be tested manually as they rely on e-mail verification. 
 - K6 documentation is pleasant to the readers eyes. Have a look calmly.

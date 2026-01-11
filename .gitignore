@@ -1,5 +1,4 @@
 # Ignore local Jira environment loader with secrets
-set_jira_env.bat
+set_jira_env.ps1
 commiting.txt
 reports/
-.env
