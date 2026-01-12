@@ -31,10 +31,14 @@ Check then both to add both options in context menu.
      - Prerequisite: variables set with ```. ..\set_jira_env.ps1```
      - From tests: ```. ..\run_test.ps1 -TestIds 001,020 -Profile smoke```
      - Outcome: creates Jira issues for failures and attaches the matching HTML in reports/.
+     - Combine reports: add ```-CombineReports``` to generate a consolidated HTML (e.g., ```. ..\run_test.ps1 -TestIds 001,010 -CombineReports```)
+     - Combine reports with specific profile: ```. ..\run_test.ps1 -TestIds 001,010 -Profile load -CombineReports```
  Run all tests with Jira issue + HTML report attached (automatic):
      - Prerequisite: variables set with ```. ..\set_jira_env.ps1```
      - From tests (default smoke): ```. ..\run_test.ps1 -AllTests```
      - From tests with profile: ```. ..\run_test.ps1 -AllTests -Profile load```
+     - Combine reports: add ```-CombineReports``` (e.g., ```. ..\run_test.ps1 -AllTests -CombineReports```)
+     - Combine reports with profile: ```. ..\run_test.ps1 -AllTests -Profile stress -CombineReports```
  Default profile note: if -Profile is omitted, tests run as smoke.
 - Default profile note: if -Profile is omitted, tests run as smoke.
 - Filter by tag (e.g., basic): from tests run ```Get-ChildItem *.js | ForEach-Object { if (Select-String -Path $_.Name -Pattern "basic" -Quiet) { k6 run $_.Name } }```
