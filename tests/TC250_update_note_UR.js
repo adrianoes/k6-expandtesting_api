@@ -19,7 +19,7 @@ export function handleSummary(data) {
 const testType = __ENV.K6_TEST_TYPE || 'smoke';
 export const options = getTestOptions(testType);
 
-export const tags = { full: 'true', negative: 'true' }
+export const tags = { negative: 'true' }
 
 
 
@@ -37,7 +37,7 @@ export default function (){
         category: randomItem(['Home', 'Work', 'Personal']),
         completed: true
     }
-    res = http.put(
+    let res = http.put(
         'https://practice.expandtesting.com/notes/api/notes/' + note_id,
         JSON.stringify(credentialsUN),
         {

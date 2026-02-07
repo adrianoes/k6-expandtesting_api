@@ -17,14 +17,14 @@ export function handleSummary(data) {
 const testType = __ENV.K6_TEST_TYPE || 'smoke';
 export const options = getTestOptions(testType);
 
-export const tags = { full: 'true', negative: 'true' }
+export const tags = { negative: 'true' }
 
 
 export default function (){
 
     const credentials = {
         name: randomString(5, 'abcdefgh'),
-        email: randomString(5, 'abcdefgh') + '@@k6.com',        
+        email: randomString(10, 'abcdefghijklmnopqrstuvwxyz0123456789') + '@@k6.com',        
         password: randomString(10),
     }
     let res = http.post(

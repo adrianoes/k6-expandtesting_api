@@ -18,7 +18,7 @@ export function handleSummary(data) {
 const testType = __ENV.K6_TEST_TYPE || 'smoke';
 export const options = getTestOptions(testType);
 
-export const tags = { full: 'true', basic: 'true' }
+export const tags = { basic: 'true' }
 
 
 export default function (){
@@ -30,7 +30,7 @@ export default function (){
         phone: randomString(12, '0123456789'),        
         company: randomString(10),
     }
-    res = http.patch(
+    let res = http.patch(
         'https://practice.expandtesting.com/notes/api/users/profile',
         JSON.stringify(credentialsUU),
         {

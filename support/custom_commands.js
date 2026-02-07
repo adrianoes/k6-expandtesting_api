@@ -6,7 +6,7 @@ import { randomItem } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js'
 export function createUser() {
     const credentials = {
         name: randomString(5, 'abcdefgh'),
-        email: randomString(5, 'abcdefgh') + '@k6.com',
+        email: randomString(10, 'abcdefghijklmnopqrstuvwxyz0123456789') + '@k6.com',
         password: randomString(10),
     }
     let res = http.post(
@@ -15,7 +15,12 @@ export function createUser() {
         { headers: { 'Content-Type': 'application/json' } }
     )
     sleep(1)
-    return { credentials, user_id: res.json().data.id }
+    const json = res.json()
+    if (!json || !json.data || !json.data.id) {
+        console.warn(`[createUser] Unexpected response: status=${res.status}`)
+        console.warn(`[createUser] Body: ${res.body}`)
+    }
+    return { credentials, user_id: json?.data?.id }
 }
 
 export function loginUser(email, password) {
@@ -26,7 +31,12 @@ export function loginUser(email, password) {
         { headers: { 'Content-Type': 'application/json' } }
     )
     sleep(1)
-    return res.json().data.token
+    const json = res.json()
+    if (!json || !json.data || !json.data.token) {
+        console.warn(`[loginUser] Unexpected response: status=${res.status}`)
+        console.warn(`[loginUser] Body: ${res.body}`)
+    }
+    return json?.data?.token
 }
 
 export function createUserAndLogin() {
@@ -47,7 +57,12 @@ export function createNote(token) {
         { headers: { 'X-Auth-Token': token, 'Content-Type': 'application/json' } }
     )
     sleep(1)
-    return { note, note_id: res.json().data.id, created_at: res.json().data.created_at }
+    const json = res.json()
+    if (!json || !json.data || !json.data.id) {
+        console.warn(`[createNote] Unexpected response: status=${res.status}`)
+        console.warn(`[createNote] Body: ${res.body}`)
+    }
+    return { note, note_id: json?.data?.id, created_at: json?.data?.created_at, updated_at: json?.data?.updated_at }
 }
 
 export function deleteAccount(token) {

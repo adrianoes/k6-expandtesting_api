@@ -19,7 +19,7 @@ export function handleSummary(data) {
 const testType = __ENV.K6_TEST_TYPE || 'smoke';
 export const options = getTestOptions(testType);
 
-export const tags = { full: 'true', basic: 'true' }
+export const tags = { basic: 'true' }
 
 export default function (){
     let res = http.get('https://practice.expandtesting.com/notes/api/health-check')

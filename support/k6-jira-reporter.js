@@ -158,6 +158,11 @@ export function handleSummary(data) {
             const testName = __ENV.K6_TEST_NAME || 'k6 test';
 
             const failedChecksDetails = formatFailedChecksDetails(checks);
+            if (!hasEnv) {
+                console.warn('[k6-jira-reporter] Jira env vars missing; skipping issue creation');
+                return {};
+            }
+
             const env = getJiraEnv();
             const summary = `k6 failure: ${testName} - ${checksFailed} checks failed`;
             const description = toPlainTextDescription({

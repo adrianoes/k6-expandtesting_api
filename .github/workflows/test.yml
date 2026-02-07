@@ -18,17 +18,11 @@ jobs:
           choco install k6 -y
 
       - name: Run all tests (Windows)
-        shell: cmd
+        shell: pwsh
         env:
           JIRA_API_SECRETS: ${{ secrets.JIRA_API_SECRETS }}
         run: |
-          .\run_all_tests.bat
-
-      - name: Combine test reports (Windows)
-        shell: pwsh
-        run: |
-          # Call the PowerShell combiner directly to avoid CMD batch parsing issues
-          pwsh -NoProfile -ExecutionPolicy Bypass -File "$PWD\scripts\combine_reports.ps1"
+          .\runner.ps1 -all -bt -cr
 
       - name: Upload the reports as artifact
         uses: actions/upload-artifact@v4

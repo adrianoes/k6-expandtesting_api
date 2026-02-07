@@ -7,7 +7,7 @@ API testing in [expandtesting](https://practice.expandtesting.com/notes/api/api-
 | Requirement                     | Version        | Note                 |
 | :------------------------------ |:---------------| :------------------- |
 | Visual Studio Code              | 1.107.1        | -                    |
-| K6                              | 1.4.0          | -                    | 
+| K6                              | 1.5.0          | -                    | 
 | GitHub Copilot Chat             | 0.35.2         | -                    | 
 
 # Installation:
@@ -20,30 +20,27 @@ Check then both to add both options in context menu.
 
 # Tests
 
-- First, set Jira variables (once per session): from the tests directory run ```. ..\set_jira_env.ps1```
-- Run all tests (default smoke):
-    - From tests: ```..\run_all_tests.bat```
-    - With profile (from tests): ```..\run_all_tests.bat load``` (profiles: smoke, load, stress, spike, breakpoint, soak)
-- Run specific tests (without Jira):
-    - Single (from tests): ```..\run_tc.bat 001 smoke```
-    - Multiple (from tests): ```..\run_tc.bat 001 020 140 load```
- Run specific tests with Jira issue + HTML report attached (automatic):
-     - Prerequisite: variables set with ```. ..\set_jira_env.ps1```
-     - From tests: ```. ..\run_test.ps1 -TestIds 001,020 -Profile smoke```
-     - Outcome: creates Jira issues for failures and attaches the matching HTML in reports/.
-     - Combine reports: add ```-CombineReports``` to generate a consolidated HTML (e.g., ```. ..\run_test.ps1 -TestIds 001,010 -CombineReports```)
-     - Combine reports with specific profile: ```. ..\run_test.ps1 -TestIds 001,010 -Profile load -CombineReports```
- Run all tests with Jira issue + HTML report attached (automatic):
-     - Prerequisite: variables set with ```. ..\set_jira_env.ps1```
-     - From tests (default smoke): ```. ..\run_test.ps1 -AllTests```
-     - From tests with profile: ```. ..\run_test.ps1 -AllTests -Profile load```
-     - Combine reports: add ```-CombineReports``` (e.g., ```. ..\run_test.ps1 -AllTests -CombineReports```)
-     - Combine reports with profile: ```. ..\run_test.ps1 -AllTests -Profile stress -CombineReports```
- Default profile note: if -Profile is omitted, tests run as smoke.
-- Default profile note: if -Profile is omitted, tests run as smoke.
-- Filter by tag (e.g., basic): from tests run ```Get-ChildItem *.js | ForEach-Object { if (Select-String -Path $_.Name -Pattern "basic" -Quiet) { k6 run $_.Name } }```
-- Consolidate HTMLs (optional, CMD): from tests run ```..\combined_report.bat```
-- Reports: generated in ```reports/```; filenames follow the pattern TCxxx_*.html.
+- Run commands from the tests directory using the unified runner: ```. ..\runner.ps1```
+
+Execution options (exclusive; choose exactly one):
+- ```-all``` (run all tests; default profile is smoke)
+- ```-i 001``` (run a single test case)
+- ```-m-001-010-050``` (run multiple test cases by number)
+- ```-c-basic``` / ```-c-full``` / ```-c-negative``` (run by category tag)
+
+Support options (combinable; any order):
+- ```-bt``` enable Jira bug ticket creation (loads Jira env automatically)
+- ```-cr``` generate a consolidated HTML report after execution
+- ```-g``` open the web dashboard (usually http://localhost:5665)
+- ```-tp-smoke``` / ```-tp-load``` / ```-tp-stress``` / ```-tp-spike``` / ```-tp-breakpoint``` / ```-tp-soak```
+
+Examples:
+- ```. ..\runner.ps1 -all```
+- ```. ..\runner.ps1 -i 001 -tp-smoke -g -bt -cr```
+- ```. ..\runner.ps1 -m-001-010-050 -tp-load -cr```
+- ```. ..\runner.ps1 -c-basic -tp-smoke```
+
+Reports: generated in ```reports/```; filenames follow the pattern TCxxx_*.html.
 
 # Support:
 
@@ -63,8 +60,6 @@ Check then both to add both options in context menu.
 
 # Tips:
 
-- **Important:** Before using the Jira reporter, you must source the ```..\ set_jira_env.ps1``` script from the C:\k6-expandtesting_api\tests directory using dot-sourcing: ```. ..\ set_jira_env.ps1```. This sets the required Jira environment variables (JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN, JIRA_PROJECT_KEY) for the current PowerShell session. Run this once per session before executing tests. Copy `set_jira_env.example.ps1` to `set_jira_env.ps1`, fill in your Jira credentials, and keep `set_jira_env.ps1` private (it's ignored by git).
-- If the automatic Jira issue creation during test execution fails or doesn't trigger, use the backup script create_jira_issues_from_reports.ps1. This script scans the reports/ folder, parses HTML test reports, and creates Jira issues for any failed checks. Navigate to C:\k6-expandtesting_api\tests and execute ```..\create_jira_issues_from_reports.ps1``` after running tests. This is useful for retrying failed issue creations.
-- UI and API tests to send password reset link to user's email and API tests to verify a password reset token and reset a user's password must be tested manually as they rely on e-mail verification. 
+- **Important:** When using ```-bt```, the runner automatically loads Jira credentials from `set_jira_env.ps1` (local) or `JIRA_API_SECRETS` (CI). Make sure those values are configured before running tests with Jira integration.
+- **Manual combined report:** if you did not run with ```-cr```, run ```. ..\combine_reports.ps1``` from the tests directory to generate ```general_report_*.html``` in ```reports/```.
 - K6 documentation is pleasant to the readers eyes. Have a look calmly.
-- Use support .bat files for a better experience. 
