@@ -1,6 +1,7 @@
-﻿import http from 'k6/http'
+import http from 'k6/http'
 import { check, sleep } from 'k6'
 import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js"
+import { getReportPath } from '../support/report-utils.js'
 import { createUserAndLogin, deleteAccount } from '../support/custom_commands.js'
 import { handleSummary as jiraSummary } from '../support/k6-jira-reporter.js'
 import { getTestOptions } from '../support/test-options.js'
@@ -9,7 +10,7 @@ export function handleSummary(data) {
         jiraSummary(data);
         return {
             // "reports/report.html": htmlReport(data),
-            "../reports/TC360_delete_user_UR.html": htmlReport(data)
+            [getReportPath('TC360_delete_user_UR')]: htmlReport(data)
         };
 }
 
@@ -45,3 +46,5 @@ export default function (){
     sleep(1);
     deleteAccount(user_token)
 }
+
+

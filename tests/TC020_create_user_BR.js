@@ -1,6 +1,7 @@
-﻿import http from 'k6/http'
+import http from 'k6/http'
 import { check, sleep } from 'k6'
 import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js"
+import { getReportPath } from '../support/report-utils.js'
 import { randomString } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js'
 import { handleSummary as jiraSummary } from '../support/k6-jira-reporter.js'
 import { getTestOptions } from '../support/test-options.js'
@@ -9,7 +10,7 @@ export function handleSummary(data) {
     jiraSummary(data);
     return {
         // "reports/report.html": htmlReport(data),
-        "../reports/TC020_create_user_BR.html": htmlReport(data)
+        [getReportPath('TC020_create_user_BR')]: htmlReport(data)
     };
 }
 
@@ -44,3 +45,5 @@ export default function (){
     sleep(1);
 
 }
+
+
