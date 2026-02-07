@@ -41,6 +41,7 @@ Examples:
 - ```. ..\runner.ps1 -c-basic -tp-smoke```
 
 Reports: generated in ```reports/```; filenames follow the pattern TCxxx_*_YYYYMMDD_HHMMSS.html.
+Combined dashboards: generated in ```reports_dashboard/``` as ```combined_dashboard_<test>_YYYYMMDD_HHMMSS.html``` and use the 2 most recent dashboard runs for that test.
 
 # Support:
 
