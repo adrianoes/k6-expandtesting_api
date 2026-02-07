@@ -6,7 +6,7 @@ API testing in [expandtesting](https://practice.expandtesting.com/notes/api/api-
 
 | Requirement                     | Version        | Note                 |
 | :------------------------------ |:---------------| :------------------- |
-| Visual Studio Code              | 1.107.1        | -                    |
+| Visual Studio Code              | 1.109.0        | -                    |
 | K6                              | 1.5.0          | -                    | 
 | GitHub Copilot Chat             | 0.35.2         | -                    | 
 
@@ -31,7 +31,7 @@ Execution options (exclusive; choose exactly one):
 Support options (combinable; any order):
 - ```-bt``` enable Jira bug ticket creation (loads Jira env automatically)
 - ```-cr``` generate a consolidated HTML report after execution
-- ```-g``` open the web dashboard (usually http://localhost:5665)
+- ```-g``` open the web dashboard (usually http://localhost:5665) and save an HTML dashboard report in ```reports_dashboard/```
 - ```-tp-smoke``` / ```-tp-load``` / ```-tp-stress``` / ```-tp-spike``` / ```-tp-breakpoint``` / ```-tp-soak```
 
 Examples:
@@ -40,7 +40,7 @@ Examples:
 - ```. ..\runner.ps1 -m-001-010-050 -tp-load -cr```
 - ```. ..\runner.ps1 -c-basic -tp-smoke```
 
-Reports: generated in ```reports/```; filenames follow the pattern TCxxx_*.html.
+Reports: generated in ```reports/```; filenames follow the pattern TCxxx_*_YYYYMMDD_HHMMSS.html.
 
 # Support:
 

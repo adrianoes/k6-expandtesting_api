@@ -3,6 +3,7 @@
 
 $root = $PSScriptRoot
 $reportsDir = Join-Path $root 'reports'
+$dashboardReportsDir = Join-Path $root 'reports_dashboard'
 $testsDir = Join-Path $root 'tests'
 
 function Get-TestMetadata($baseName) {
@@ -170,11 +171,447 @@ function Combine-Reports {
 
     $final = "<!DOCTYPE html>`n<html>`n$headHtml`n<body>`n<main>`n$combinedBody`n</main>`n$filterScript`n</body>`n</html>"
 
-    $timestamp = Get-Date -Format 'yyyyMMdd_HHmm'
+    $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
     $timeFile = Join-Path $reportsDir ("general_report_$timestamp.html")
     Set-Content -Path $timeFile -Value $final -Encoding UTF8
 
     Write-Host "[combine] Combined report created: $($timeFile | Split-Path -Leaf)"
 }
 
+function Format-DashboardLabel($timestamp) {
+    if ($timestamp -match '^(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})$') {
+        return "$($matches[1])-$($matches[2])-$($matches[3]) $($matches[4]):$($matches[5]):$($matches[6])"
+    }
+    return $timestamp
+}
+
+function Get-DashboardData($content) {
+    $match = [regex]::Match($content, '(?s)<script id="data"[^>]*>(.*?)</script>')
+    if (-not $match.Success) {
+        return $null
+    }
+    return $match.Groups[1].Value.Trim()
+}
+
+function Get-DashboardGroups {
+    if (-not (Test-Path $dashboardReportsDir)) {
+        Write-Host "[combine] Warning: Dashboard reports directory not found: $dashboardReportsDir"
+        return @()
+    }
+
+    $items = Get-ChildItem -Path $dashboardReportsDir -Filter '*_dashboard_*.html' | ForEach-Object {
+        if ($_.Name -match '^(?<test>.+)_dashboard_(?<ts>\d{8}_\d{6})\.html$') {
+            [pscustomobject]@{
+                File = $_
+                Test = $matches['test']
+                Timestamp = $matches['ts']
+            }
+        }
+    }
+
+    return $items | Group-Object Test
+}
+
+function Combine-DashboardReport($group) {
+  $desiredRuns = 2
+  $runs = $group.Group | Sort-Object Timestamp | Select-Object -Last $desiredRuns
+  if ($runs.Count -lt $desiredRuns) {
+    Write-Host "[combine] Skipping $($group.Name): expected $desiredRuns dashboard runs, found $($runs.Count)"
+    return
+  }
+
+    $templateContent = Get-Content -Raw -Path $runs[0].File.FullName
+    $dataBlocks = @()
+    foreach ($run in $runs) {
+        $content = Get-Content -Raw -Path $run.File.FullName
+        $dataBlock = Get-DashboardData $content
+        if (-not $dataBlock) {
+            Write-Host "[combine] Warning: data block not found in $($run.File.Name)"
+            return
+        }
+        $dataBlocks += $dataBlock
+    }
+
+    $dataScript = "<script id=`"data`" type=`"application/json; charset=utf-8; gzip; base64`">$($dataBlocks[0])</script>"
+    for ($i = 0; $i -lt $dataBlocks.Count; $i++) {
+        $idx = $i + 1
+        $dataScript += "`n<script id=`"data-run-$idx`" type=`"application/json; charset=utf-8; gzip; base64`">$($dataBlocks[$i])</script>"
+    }
+
+    $runLabels = $runs | ForEach-Object { Format-DashboardLabel $_.Timestamp }
+    $runKeys = $runs | ForEach-Object { $_.Timestamp }
+    $runLabelsJson = $runLabels | ConvertTo-Json -Compress
+    $runKeysJson = $runKeys | ConvertTo-Json -Compress
+
+    $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
+    $entryScript = @"
+const bp=document.getElementById("root");
+const runIds=["data-run-1","data-run-2"];
+const runLabels=$runLabelsJson;
+const runKeys=$runKeysJson;
+const runSuffixes=["","__r1"];
+  const combinedTimestamp="$timestamp";
+const aggLabelMap={};
+
+function mapAggregateLabel(key){
+  return aggLabelMap[key]||key;
+}
+
+function parseMetricQuery(query,suffix){
+  if(!query||query==="time") return query;
+  const addSuffix=(name)=>{
+    const braceIndex=name.indexOf("{");
+    if(braceIndex===-1) return name+suffix;
+    return name.slice(0,braceIndex)+suffix+name.slice(braceIndex);
+  };
+  const quoted=query.replace(/^\[("|')([^"']+)\1\]/,(m,q,name)=>"["+q+addSuffix(name)+q+"]");
+  if(quoted!==query) return quoted;
+  const bracketIndex=query.indexOf("[");
+  if(bracketIndex!==-1) return query.slice(0,bracketIndex)+suffix+query.slice(bracketIndex);
+  const braceIndex=query.indexOf("{");
+  if(braceIndex!==-1) return query.slice(0,braceIndex)+suffix+query.slice(braceIndex);
+  const dotIndex=query.indexOf(".");
+  if(dotIndex!==-1) return query.slice(0,dotIndex)+suffix+query.slice(dotIndex);
+  return query+suffix;
+}
+
+function formatTimestamp(ts){
+  const match=ts.match(/^(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})$/);
+  if(!match) return ts;
+  return match[1]+"-"+match[2]+"-"+match[3]+"T"+match[4]+":"+match[5]+":"+match[6];
+}
+
+function patchMetricsUnit(metrics){
+  const original=metrics.unit.bind(metrics);
+  metrics.unit=(name,agg)=>{
+    if(!agg) return original(name,agg);
+    const base=agg.split("__")[0];
+    return original(name,base);
+  };
+}
+
+function patchSummaryHeader(){
+  const desc=Object.getOwnPropertyDescriptor(fu.prototype,"header");
+  if(!desc||!desc.get) return;
+  Object.defineProperty(fu.prototype,"header",{
+    get:function(){
+      const base=desc.get.call(this);
+      return base.map((item,idx)=>idx===0?item:mapAggregateLabel(item));
+    }
+  });
+}
+
+function buildMarkerPaths(){
+  function pointsPath(shape){
+    return (u,seriesIdx,idx0,idx1,filter)=>{
+      const xVals=u.data[0];
+      const yVals=u.data[seriesIdx];
+      const xScale=u.series[0].scale;
+      const yScale=u.series[seriesIdx].scale;
+      const size=u.series[seriesIdx].points.size||6;
+      const half=size/2;
+      const path=new Path2D();
+      const idxs=filter||[];
+      const useAll=idxs.length===0;
+      const start=idx0??0;
+      const end=idx1??(xVals.length-1);
+      const drawAt=(idx)=>{
+        const xv=xVals[idx];
+        const yv=yVals[idx];
+        if(xv==null||yv==null) return;
+        const x=u.valToPos(xv,xScale,true);
+        const y=u.valToPos(yv,yScale,true);
+        if(shape==="square"){ path.rect(x-half,y-half,size,size); return; }
+        if(shape==="triangle"){
+          path.moveTo(x,y-half);
+          path.lineTo(x+half,y+half);
+          path.lineTo(x-half,y+half);
+          path.closePath();
+          return;
+        }
+        if(shape==="diamond"){
+          path.moveTo(x,y-half);
+          path.lineTo(x+half,y);
+          path.lineTo(x,y+half);
+          path.lineTo(x-half,y);
+          path.closePath();
+          return;
+        }
+      };
+      if(useAll){
+        for(let i=start;i<=end;i++){ drawAt(i); }
+      } else {
+        for(const i of idxs){ drawAt(i); }
+      }
+      return { stroke:path, fill:path, clip:null, flags:0 };
+    };
+  }
+  return {
+    square: pointsPath("square"),
+    triangle: pointsPath("triangle"),
+    diamond: pointsPath("diamond")
+  };
+}
+
+function patchSeriesBuild(){
+  const markerPaths=buildMarkerPaths();
+  const original=v0.prototype.buildSeries;
+  v0.prototype.buildSeries=function(seriesDefs,palette){
+    const result=original.call(this,seriesDefs,palette);
+    const defs=(seriesDefs&&seriesDefs[0]&&seriesDefs[0].query!=="time")
+      ? [{query:"time"},...seriesDefs]
+      : (seriesDefs||[]);
+    for(let i=0;i<defs.length;i++){
+      const def=defs[i];
+      if(!def||!result[i]) continue;
+      if(def.colorIndex!=null){
+        const color=palette[def.colorIndex%palette.length];
+        result[i].stroke=color.stroke;
+        result[i].fill=color.fill;
+      }
+      if(def.marker){
+        result[i].points={...result[i].points,show:true,size:6,paths:markerPaths[def.marker]};
+      }
+    }
+    return result;
+  };
+}
+
+function normalizeQueryName(query){
+  if(!query) return query;
+  const match=query.match(/^\[("|')(.+)\1\]$/);
+  return match?match[2]:query;
+}
+
+function extractBaseName(query){
+  const normalized=normalizeQueryName(query);
+  const bracketIndex=normalized.indexOf("[");
+  const dotIndex=normalized.indexOf(".");
+  let endIndex=normalized.length;
+  if(bracketIndex!==-1) endIndex=bracketIndex;
+  else if(dotIndex!==-1) endIndex=dotIndex;
+  return normalized.slice(0,endIndex);
+}
+
+function extractAggregates(query){
+  if(!query) return [];
+  const parenMatch=query.match(/\(([^\)]+)\)/);
+  if(parenMatch){
+    return parenMatch[1].split("||").map(s=>s.trim()).filter(Boolean);
+  }
+  const andMatch=query.match(/&&\s*([a-z0-9_]+)/i);
+  if(andMatch) return [andMatch[1].trim()];
+  return [];
+}
+
+function replaceAggregateFilter(query,agg){
+  if(!query) return query;
+  if(query.indexOf("(")!==-1) return query.replace(/\([^\)]*\)/,agg);
+  return query.replace(/&&\s*[a-z0-9_]+/i,"&& "+agg);
+}
+
+function patchSamplesQuery(){
+  const original=Gu.prototype.queryAll;
+  Gu.prototype.queryAll=function(query){
+    if(typeof query==="string" && query.indexOf("__r")!==-1){
+      const baseName=extractBaseName(query);
+      let vectors=this.lookup[baseName];
+      if(!Array.isArray(vectors)){
+        const values=this.values||{};
+        vectors=Object.values(values).filter(v=>v&&(v.name===baseName||(v.metric&&v.metric.name===baseName)));
+      }
+      if(!Array.isArray(vectors)) return [];
+      const dotIndex=query.indexOf(".");
+      if(dotIndex!==-1){
+        const agg=query.slice(dotIndex+1).trim();
+        const filtered=vectors.filter(v=>v.aggregate===agg);
+        if(filtered.length===0 && vectors.length>0 && vectors.every(v=>v.aggregate==null)) return vectors;
+        return filtered;
+      }
+      const aggs=extractAggregates(query);
+      if(aggs.length>0){
+        const filtered=vectors.filter(v=>aggs.includes(v.aggregate));
+        if(filtered.length===0 && vectors.length>0 && vectors.every(v=>v.aggregate==null)) return vectors;
+        return filtered;
+      }
+      return vectors;
+    }
+    return original.call(this,query);
+  };
+}
+
+function addMetrics(baseMetrics,runMetrics,suffix){
+  for(const name in runMetrics.values){
+    const meta=runMetrics.values[name];
+    const newName=name+suffix;
+    baseMetrics.values[newName]={...meta,name:newName};
+    baseMetrics.names.push(newName);
+  }
+}
+
+function addSamples(baseSamples,runSamples,baseMetrics,suffix){
+  for(const key in runSamples.values){
+    const vector=runSamples.values[key];
+    const newName=vector.name+suffix;
+    const newKey=vector.aggregate?(newName+"."+vector.aggregate):newName;
+    const cloned={...vector,name:newName,metric:baseMetrics.values[newName]||vector.metric};
+    baseSamples.values[newKey]=cloned;
+    baseSamples.vectors[newKey]=cloned;
+    if(!baseSamples.lookup[newName]) baseSamples.lookup[newName]=[];
+    baseSamples.lookup[newName].push(cloned);
+  }
+}
+
+function mergeSummary(baseSummary,runSummaries){
+  for(const metricName in baseSummary.values){
+    const baseRow=baseSummary.values[metricName];
+    const newValues={};
+    for(let runIdx=0;runIdx<runSummaries.length;runIdx++){
+      const runRow=runSummaries[runIdx].values[metricName];
+      if(!runRow) continue;
+      for(const agg in runRow.values){
+        const key=agg+"__"+(runIdx+1)+"__"+runKeys[runIdx];
+        newValues[key]=runRow.values[agg];
+        aggLabelMap[key]=agg+" - "+runLabels[runIdx];
+      }
+    }
+    baseRow.values=newValues;
+  }
+  baseSummary.lookup=Object.values(baseSummary.values);
+}
+
+function normalizeTitle(value){
+  return (value||"").toLowerCase().replace(/[^a-z0-9]+/g,"");
+}
+
+const overlayTitles=new Set([
+  "httpperformanceoverview",
+  "vus",
+  "transferrate",
+  "httprequestduration",
+  "iterationduration",
+  "httprequestfailedrate",
+  "requestduration",
+  "requestfailedrate",
+  "requestrate",
+  "requestwaiting",
+  "tlshandshaking",
+  "requestsending",
+  "requestconnecting",
+  "requestreceiving",
+  "requestblocked"
+]);
+
+function expandPanelSeries(panel){
+  if(panel.kind!=="chart"||!panel.series) return;
+  const baseSeries=panel.series;
+  const expanded=[];
+  baseSeries.forEach((serie,idx)=>{
+    if(serie.query==="time"){
+      expanded.push(serie);
+      return;
+    }
+    const aggList=extractAggregates(serie.query);
+    const aggregates=aggList.length>0?aggList:[null];
+    for(const agg of aggregates){
+      const baseQuery=agg?replaceAggregateFilter(serie.query,agg):serie.query;
+      for(let runIdx=0;runIdx<runSuffixes.length;runIdx++){
+        const suffix=runSuffixes[runIdx];
+        const query=parseMetricQuery(baseQuery,suffix);
+        const marker=runIdx===0?"square":runIdx===1?"triangle":"diamond";
+        const hasLegend=!!(serie.legend||serie.label);
+        const legendBase=hasLegend?(serie.legend||serie.label):(extractBaseName(serie.query)||"value");
+        const useAggLabel=!!(agg&&aggList.length>1);
+        const legend=(useAggLabel?agg:legendBase)+" - "+runLabels[runIdx];
+        const aggIndex=aggList.length>0?Math.max(0,aggList.indexOf(agg)):0;
+        const colorBase=idx+1;
+        const clone={...serie,query,legend,marker,colorIndex:colorBase+aggIndex};
+        expanded.push(clone);
+      }
+    }
+  });
+  panel.series=expanded;
+}
+
+function patchConfig(config){
+  config.tabs.forEach(tab=>{
+    tab.sections.forEach(section=>{
+      section.panels.forEach(panel=>{
+        if(!overlayTitles.has(normalizeTitle(panel.title))) return;
+        expandPanelSeries(panel);
+      });
+    });
+  });
+}
+
+async function parseDigestFromTag(tagId){
+  const dataEl=document.getElementById("data");
+  const src=document.getElementById(tagId);
+  if(!src) return null;
+  dataEl.innerText=src.innerText;
+  return await ec();
+}
+
+async function buildCombinedDigest(){
+  const digests=[];
+  for(const id of runIds){
+    const digest=await parseDigestFromTag(id);
+    if(digest) digests.push(digest);
+  }
+  if(digests.length===0) return null;
+  const base=digests[0];
+  patchMetricsUnit(base.metrics);
+  patchSummaryHeader();
+  patchSeriesBuild();
+  patchSamplesQuery();
+
+  for(let i=1;i<digests.length;i++){
+    addMetrics(base.metrics,digests[i].metrics,runSuffixes[i]);
+  }
+  for(let i=1;i<digests.length;i++){
+    addSamples(base.samples,digests[i].samples,base.metrics,runSuffixes[i]);
+  }
+  mergeSummary(base.summary,digests.map(d=>d.summary));
+  if(combinedTimestamp){
+    const parsed=formatTimestamp(combinedTimestamp);
+    const dt=new Date(parsed);
+    if(!isNaN(dt.getTime())) base.start=dt;
+  }
+  patchConfig(base.config);
+  return base;
+}
+
+buildCombinedDigest().then(digest=>{
+  if(digest){
+    Qn(ne(yp,{digest:digest}),bp);
+  }
+});
+"@
+
+    $templateContent = [regex]::Replace($templateContent, '(?s)<script id="data"[^>]*>.*?</script>', $dataScript, 1)
+    $templateContent = [regex]::Replace($templateContent, 'const bp=document\.getElementById\("root"\);\s*ec\(\)\.then\(e=>Qn\(ne\(yp,\{digest:e\}\),bp\)\);', $entryScript)
+    $badMicro = ([char]0x00C2) + ([char]0x00B5) + 's'
+    $micro = ([char]0x00B5) + 's'
+    $templateContent = $templateContent -replace $badMicro, 'us'
+    $templateContent = $templateContent -replace $micro, 'us'
+
+    $outFile = Join-Path $dashboardReportsDir ("combined_dashboard_$($group.Name)_$timestamp.html")
+    Set-Content -Path $outFile -Value $templateContent -Encoding UTF8
+
+    Write-Host "[combine] Combined dashboard created: $($outFile | Split-Path -Leaf)"
+}
+
+function Combine-DashboardReports {
+    $groups = Get-DashboardGroups
+    if ($groups.Count -eq 0) {
+        Write-Host "[combine] No dashboard reports found to combine"
+        return
+    }
+
+    foreach ($group in $groups) {
+        Combine-DashboardReport $group
+    }
+}
+
 Combine-Reports
+Combine-DashboardReports
